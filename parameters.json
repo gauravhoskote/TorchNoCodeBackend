@@ -1,0 +1,24 @@
+{
+    "layers" : [
+        {
+            "layer_type" : "linear",
+            "input_size" : 10,
+            "output_size" : 100,
+            "bias": true
+        },
+        {
+            "layer_type" : "linear",
+            "input_size" : 100,
+            "output_size" : 10,
+            "bias" : false
+        }
+    ],
+    "epochs": 10,
+    "batch_size": 5,
+    "preloaded_dataset" : true,
+    "learning_rate": 0.001,
+    "training_split": 0.7,
+    "dataset" : {
+        "id" : "FashionMNIST"
+    }
+}
