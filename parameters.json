@@ -2,14 +2,16 @@
     "layers" : [
         {
             "layer_type" : "linear",
-            "input_size" : 10,
+            "layer_name" : "fc1",
+            "input_size" : 784,
             "output_size" : 100,
             "bias": true
         },
         {
             "layer_type" : "linear",
+            "layer_name" : "fc2",
             "input_size" : 100,
-            "output_size" : 10,
+            "output_size" : 1,
             "bias" : false
         }
     ],
@@ -20,5 +22,7 @@
     "training_split": 0.7,
     "dataset" : {
         "id" : "FashionMNIST"
-    }
+    },
+    "optimizer" : "SGD",
+    "loss_function" : "MSE"
 }
