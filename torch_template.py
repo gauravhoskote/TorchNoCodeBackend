@@ -6,8 +6,10 @@ from torchvision import datasets
 from torchvision.transforms import ToTensor
 from torch.utils.data import DataLoader
 import json
-from mappers import optimMapper, lossMapper, datasetMapper
+from mappers import optimMapper, lossMapper, datasetMapper, layerMapper
+import torch.nn.functional as F
 
+# from utils import get_accuracy
 json_file = open("./parameters.json")
 param_dict = json.load(json_file)
 layers = param_dict['layers']
@@ -15,8 +17,7 @@ layers = param_dict['layers']
 def param_reader():
   layer_list = []
   for layer in layers:
-    if layer['layer_type'] == 'linear':
-      layer_list.append(nn.Linear(layer['input_size'], layer['output_size'], layer['bias']))
+      layer_list.append(layerMapper(layer['layer_type'], layer))
   return layer_list
 
 class NeuralNet(nn.Module):
@@ -24,21 +25,15 @@ class NeuralNet(nn.Module):
     super(NeuralNet, self).__init__()
     self.input = input
     self.params = param_reader()
-    #TODO layers to the NN shd be parameters
-    # Class cannot be printed otherwise
     self.layers = nn.ModuleList(self.params)
-
 
   #forward pass
   def forward(self, x):
-      x = torch.flatten(x,1)
-      for layer in self.layers:
+      for i, layer in enumerate(self.layers):
           x = layer(x)
       return x
 
-model = NeuralNet(layers[0]['input_size'])
-for param in model.parameters():
-    print(param.shape)
+model = NeuralNet(param_dict['input_size'])
 # Dataset and DataLoaders
 
 if param_dict['preloaded_dataset']:
@@ -47,7 +42,6 @@ else:
     print('Custom Dataset TBD')
 
 
-print(model)
 # print(model.layers)
 train_dataloader = DataLoader(training_data, param_dict['batch_size'], shuffle=True)
 test_dataloader = DataLoader(test_data, param_dict['batch_size'], shuffle=True)
@@ -61,9 +55,23 @@ epochs = param_dict['epochs']
 #Training
 for i in range(epochs):
     print(f'Running Epoch #{i+1}')
-    for i , (features, labels)  in enumerate(train_dataloader):
+    for batch , (features, labels) in enumerate(train_dataloader):
         predictions = model(features)
-        loss = criterion(predictions, labels.float())
+        loss = criterion(predictions, labels)
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
+def get_accuracy(loader, model):
+    num_samples = 0
+    num_correct = 0
+    model.eval()
+    with torch.no_grad():
+        for features, labels in loader:
+            scores = model(features)
+            print(scores)
+            print(labels)
+            loss = criterion(scores, labels)
+            print('Loss: ' + str(loss))
+            break
+
+get_accuracy(test_dataloader, model)

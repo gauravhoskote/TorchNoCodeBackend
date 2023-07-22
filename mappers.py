@@ -6,33 +6,18 @@ from torchvision.transforms import ToTensor
 from torch.utils.data import DataLoader
 import json
 
+def layerMapper(key, layer):
+    return getattr(nn, key)(**layer['params'])
+    #TODO Add Try Catch Block here
 
 def lossMapper(key):
-    mapper_dictionary = {
-        'MSE' : nn.MSELoss()
-    }
-    return mapper_dictionary[key]
+    return getattr(nn, key)()
 
 
 def optimMapper(key, lr, model):
-    optim_dictionary = {
-        'SGD': torch.optim.SGD(model.parameters(), lr = lr)
-    }
-    return optim_dictionary[key]
+    return getattr(torch.optim, key)(model.parameters(), lr=lr)
 
 def datasetMapper(key):
-    if key == 'FashionMNIST':
-        training_data = datasets.FashionMNIST(
-            root="data",
-            train=True,
-            download=True,
-            transform=ToTensor()
-        )
-        test_data = datasets.FashionMNIST(
-            root="data",
-            train=False,
-            download=True,
-            transform=ToTensor()
-        )
-        ## Add all datasets here
+    training_data = getattr(datasets, key)(root="data", train=True, download=True, transform=ToTensor())
+    test_data = getattr(datasets, key)(root="data", train=False, download=True, transform=ToTensor())
     return training_data, test_data
