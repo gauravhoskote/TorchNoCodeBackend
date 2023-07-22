@@ -1,12 +1,24 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
+import threading
 import json
+import time
+import subprocess
+
 app = Flask(__name__)
+CORS(app)
 
 ACK_MESSAGE = {"response": "Acknowledged"}
 
 @app.route('/')
 def hello():
     return 'Hello, World!'
+
+
+def start_training():
+    print("Training started")
+    time.sleep(10)
+    subprocess.run(["python", "torch_template.py"])
 
 
 

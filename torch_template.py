@@ -1,4 +1,3 @@
-
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
@@ -10,7 +9,7 @@ from mappers import optimMapper, lossMapper, datasetMapper, layerMapper
 import torch.nn.functional as F
 
 # from utils import get_accuracy
-json_file = open("./parameters.json")
+json_file = open("./params.json")
 param_dict = json.load(json_file)
 layers = param_dict['layers']
 
@@ -53,14 +52,19 @@ epochs = param_dict['epochs']
 
 
 #Training
-for i in range(epochs):
-    print(f'Running Epoch #{i+1}')
-    for batch , (features, labels) in enumerate(train_dataloader):
-        predictions = model(features)
-        loss = criterion(predictions, labels)
-        loss.backward()
-        optimizer.step()
-        optimizer.zero_grad()
+def train_model(epochs, train_dataloader, model):
+    for i in range(epochs):
+        print(f'Running Epoch #{i+1}')
+        for batch , (features, labels) in enumerate(train_dataloader):
+            predictions = model(features)
+            loss = criterion(predictions, labels)
+            loss.backward()
+            optimizer.step()
+            optimizer.zero_grad()
+    model.eval() #for batch norm and other layers
+
+train_model(epochs, train_dataloader, model)
+
 def get_accuracy(loader, model):
     num_samples = 0
     num_correct = 0
